@@ -26,7 +26,7 @@ defmodule HCIndexer.Mapping do
   end
 
   def fetch_mapping(index) do
-    get("#{Atom.to_string(index)}/_mapping/#{Atom.to_string(index)}")
+    get!("#{Atom.to_string(index)}/_mapping/#{Atom.to_string(index)}")
   end
 
   defmacro mapping(index \\ nil, do: block) do

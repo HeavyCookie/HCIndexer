@@ -69,7 +69,7 @@ defmodule HCIndexer.Index do
   @spec create_index_alias(Atom.t) :: HTTPoison.Response.t
   def create_index_alias(index) do
     name = Atom.to_string(index)
-    put("#{get_dated_index_name(name)}/_alias/#{name}", "")
+    put!("#{get_dated_index_name(name)}/_alias/#{name}")
   end
 
   @doc """

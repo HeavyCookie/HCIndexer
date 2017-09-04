@@ -7,8 +7,8 @@ defmodule HCIndexer.Alias do
     case get("#{name}/_aliases") do
       {:err, _} ->
         []
-      result ->
-        result.body |> Poison.decode!() |> Map.keys()
+      {:ok, result} ->
+        Map.keys(result)
     end
   end
 

@@ -13,8 +13,8 @@ defmodule HCIndexer.Search do
   def search(index, query) do
     base = "#{Atom.to_string(index)}/_search"
     case is_map(query) do
-      true -> get(base, query)
-      false -> get("#{base}?q=#{query}")
+      true -> get!(base, query)
+      false -> get!("#{base}?q=#{query}")
     end
   end
 end
