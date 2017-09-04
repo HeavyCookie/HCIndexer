@@ -1,3 +1,5 @@
+require Logger
+
 defmodule HCIndexer.Index do
   @moduledoc """
   Manage document indexation
@@ -59,5 +61,56 @@ defmodule HCIndexer.Index do
           false
         end
     end
+  end
+
+  @doc """
+  Create an index with an alias to ease reindexing procedure
+  """
+  @spec create_index_alias(Atom.t) :: HTTPoison.Response.t
+  def create_index_alias(index) do
+    name = Atom.to_string(index)
+    put("#{get_dated_index_name(name)}/_alias/#{name}", "")
+  end
+
+  @doc """
+  Return a name followed by ISO8601 date
+  """
+  @spec get_dated_index_name(String.t | Atom.t) :: String.t
+  def get_dated_index_name(index) when is_atom(index) do
+    Atom.to_string(index) |> get_dated_index_name()
+  end
+
+  def get_dated_index_name(index) when is_binary(index) do
+    date = DateTime.utc_now()
+      |> DateTime.to_iso8601(:basic)
+      |> String.replace(~r/[^\d]/, "_")
+    "#{index}_#{date}"
+  end
+
+  @doc """
+  Create an index from a struct using `HCIndexer.Searchable`
+  """
+  def create(module) do
+    create(module.index, module.mapping, module.search_settings)
+  end
+
+  @doc """
+  Create an index
+  """
+  def create(index, properties, settings \\ nil) do
+    # Create index with mapping & settings
+    data = %{
+      mappings: %{
+        index => %{
+          _all: %{ enabled: false }, # index only mapped attributes
+          properties: properties,
+        }
+      },
+      settings: settings,
+      aliases: %{ index => %{} }, # Create index alias with base index name
+    }
+    real_index_name = get_dated_index_name(index)
+    HCIndexer.Alias.delete_all(index)
+    {real_index_name, put(real_index_name, data)} # Create index with a dated name
   end
 end
