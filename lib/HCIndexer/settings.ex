@@ -1,6 +1,6 @@
 defmodule HCIndexer.Settings do
   @moduledoc """
-  Change index settings
+  Manage ElasticSearch's "/_settings"
   """
   import HCIndexer.Request
 
@@ -16,12 +16,24 @@ defmodule HCIndexer.Settings do
     end
   end
 
+  @doc """
+  Create settings
+  """
+  @spec create_settings(atom, map) ::
+    {:ok, HTTPoison.Response.t | HTTPoison.AsyncResponse.t} |
+    {:error, HTTPoison.Error.t}
   def create_settings(index, settings) do
     put("#{Atom.to_string(index)}", %{
       settings: settings,
     })
   end
 
+  @doc """
+  Update settings
+  """
+  @spec create_settings(atom, map) ::
+    {:ok, HTTPoison.Response.t | HTTPoison.AsyncResponse.t} |
+    {:error, HTTPoison.Error.t}
   def update_settings(index, settings) do
     url_index = "#{Atom.to_string(index)}"
     post("#{url_index}/_close")

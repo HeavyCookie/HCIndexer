@@ -1,5 +1,3 @@
-require Logger
-
 defmodule HCIndexer.Index do
   @moduledoc """
   Manage document indexation
@@ -23,6 +21,11 @@ defmodule HCIndexer.Index do
     end
   end
 
+  @doc """
+  Add a document in an index
+  """
+  @spec index(atom, map | list) ::
+    {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
   def index(index, %{id: id} = document),
     do: put("#{Atom.to_string(index)}/#{Atom.to_string(index)}/#{id}", document)
 
@@ -30,6 +33,12 @@ defmodule HCIndexer.Index do
     when is_list(documents),
     do: bulk_index(index, documents)
 
+
+  @doc """
+  Add a document in an index
+  """
+  @spec index(atom, list) ::
+    {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
   def bulk_index(index, documents) do
     transform_function = fetch_transform_function(List.first(documents))
 
@@ -91,6 +100,8 @@ defmodule HCIndexer.Index do
   @doc """
   Create an index from a struct using `HCIndexer.Searchable`
   """
+  @spec create(module) ::
+    {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
   def create(module) do
     create(module.index, module.mapping, module.search_settings)
   end
@@ -98,12 +109,14 @@ defmodule HCIndexer.Index do
   @doc """
   Create an index, override previous one if exists
   """
+  @spec create(atom, map, map) ::
+    {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
   def create(index, properties, settings \\ nil) do
     # Delete previous existing index
     index
-    |> Atom.to_string
+    |> Atom.to_string()
     |> Alias.list_index()
-    |> Enum.map &delete/1
+    |> Enum.map(&delete/1)
     # Create index with mapping & settings
     data = %{
       mappings: %{
@@ -120,6 +133,11 @@ defmodule HCIndexer.Index do
     {real_index_name, put(real_index_name, data)} # Create index with a dated name
   end
 
+  @doc """
+  Remove an index
+  """
+  @spec remove(String.t) ::
+    {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
   def remove(name) do
     delete name
   end
