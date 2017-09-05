@@ -20,7 +20,7 @@ defmodule HCIndexer.Request do
     log(method, url, body)
 
     method
-    |> HTTPoison.request!(elasticsearch_url <> url, body,
+    |> HTTPoison.request!(elasticsearch_url() <> url, body,
       [{"Content-Type", "application/json"}] ++ opts)
     |> decode_response
   end
@@ -28,6 +28,7 @@ defmodule HCIndexer.Request do
   def get!(url, body \\ ""), do: request!(:get, url, body)
   def put!(url, body \\ ""), do: request!(:put, url, body)
   def post!(url, body \\ ""), do: request!(:post, url, body)
+  def delete!(url, body \\ ""), do: request!(:delete, url, body)
 
   def request(method, url, body \\ "", opts \\ [])
 
@@ -39,7 +40,7 @@ defmodule HCIndexer.Request do
     log(method, url, body)
 
     method
-    |> HTTPoison.request(elasticsearch_url <> url, body,
+    |> HTTPoison.request(elasticsearch_url() <> url, body,
       [{"Content-Type", "application/json"}] ++ opts)
     |> decode_response
   end
@@ -56,13 +57,5 @@ defmodule HCIndexer.Request do
   def get(url, body \\ ""), do: request(:get, url, body)
   def put(url, body \\ ""), do: request(:put, url, body)
   def post(url, body \\ ""), do: request(:post, url, body)
-
-  def search(index, q) do
-    base_url = "#{index}/_search"
-    results = case is_binary(q) do
-      true -> get!("#{base_url}?q=#{q}")
-      false -> get!(base_url, q)
-    end
-    Results.parse(results)
-  end
+  def delete(url, body \\ ""), do: request(:delete, url, body)
 end

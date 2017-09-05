@@ -5,6 +5,7 @@ defmodule HCIndexer.Index do
   Manage document indexation
   """
   import HCIndexer.Request
+  alias HCIndexer.Alias
   @callback to_elasticsearch(Map.t) :: Map.t
 
   defmacro __using__(_) do
@@ -95,9 +96,14 @@ defmodule HCIndexer.Index do
   end
 
   @doc """
-  Create an index
+  Create an index, override previous one if exists
   """
   def create(index, properties, settings \\ nil) do
+    # Delete previous existing index
+    index
+    |> Atom.to_string
+    |> Alias.list_index()
+    |> Enum.map &delete/1
     # Create index with mapping & settings
     data = %{
       mappings: %{
@@ -110,7 +116,11 @@ defmodule HCIndexer.Index do
       aliases: %{ index => %{} }, # Create index alias with base index name
     }
     real_index_name = get_dated_index_name(index)
-    HCIndexer.Alias.delete_all(index)
+    Alias.delete_all(index)
     {real_index_name, put(real_index_name, data)} # Create index with a dated name
+  end
+
+  def remove(name) do
+    delete name
   end
 end
