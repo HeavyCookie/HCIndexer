@@ -3,9 +3,12 @@ defmodule HCIndexer.Request do
 
   require Logger
 
-  def elasticsearch_url, do: Application.get_env(:hcindexer, :elasticsearch_url)
+  def elasticsearch_url,
+    do: Application.get_env(:hcindexer, :elasticsearch_url)
+      || System.get_env("ELASTICSEARCH_URL")
+      || "http://localhost:9200"
 
-  def log(method, url, body),
+  defp log(method, url, body),
     do: [ __MODULE__.__info__(:module),
       method |> Atom.to_string |> String.upcase, url, body ]
       |> Enum.join(" ")
