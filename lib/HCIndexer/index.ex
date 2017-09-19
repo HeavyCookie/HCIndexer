@@ -40,7 +40,10 @@ defmodule HCIndexer.Index do
   @spec index(atom, list) ::
     {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
   def bulk_index(index, documents) do
-    transform_function = fetch_transform_function(List.first(documents))
+    transform_function = case fetch_transform_function(List.first(documents)) do
+      nil -> &Map.from_struct/1
+      func -> func
+    end
 
     documents
     |> Enum.map(fn document ->
@@ -69,7 +72,7 @@ defmodule HCIndexer.Index do
         if Kernel.function_exported?(module, :search_data, 1) do
           &module.search_data/1
         else
-          false
+          nil
         end
     end
   end
