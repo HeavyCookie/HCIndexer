@@ -10,7 +10,7 @@ defmodule HCIndexer.Alias do
   @spec list_index(String.t) :: list
   def list_index(name) do
     case get("#{name}/_aliases") do
-      {:err, _} ->
+      {:error, _} ->
         []
       {:ok, result} ->
         Map.keys(result)
@@ -25,8 +25,8 @@ defmodule HCIndexer.Alias do
   def delete_all(name) do
     actions = name
       |> list_index()
-      |> Enum.map(&(%{ "remove" => %{ "index" => &1, "alias" => name}}))
+      |> Enum.map(&(%{"remove" => %{"index" => &1, "alias" => name}}))
 
-    post "_aliases", %{ "actions" => actions }
+    post "_aliases", %{"actions" => actions}
   end
 end

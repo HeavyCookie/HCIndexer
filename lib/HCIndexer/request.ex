@@ -26,8 +26,8 @@ defmodule HCIndexer.Request do
   """
   @spec log(atom, String.t, map | String.t) :: :ok | {:error, String.t}
   defp log(method, url, body),
-    do: [ __MODULE__.__info__(:module),
-      method |> Atom.to_string |> String.upcase, url, body ]
+    do: [__MODULE__.__info__(:module),
+      method |> Atom.to_string |> String.upcase, url, body]
       |> Enum.join(" ")
 
   @doc """

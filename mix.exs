@@ -33,6 +33,7 @@ defmodule HCIndexer.Mixfile do
     [
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
+      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:poison, "~> 3.1"},
       {:httpoison, "~> 0.13"},
     ]

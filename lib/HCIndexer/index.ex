@@ -26,13 +26,13 @@ defmodule HCIndexer.Index do
   """
   @spec index(atom, map | list) ::
     {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
-  def index(index, %{id: id} = document),
+  def index(index, %{id: id} = document)
+    when is_map(document),
     do: put("#{Atom.to_string(index)}/#{Atom.to_string(index)}/#{id}", document)
 
   def index(index, documents)
     when is_list(documents),
     do: bulk_index(index, documents)
-
 
   @doc """
   Add a document in an index
@@ -47,7 +47,8 @@ defmodule HCIndexer.Index do
       header = %{index: %{_index: index, _type: index, _id: document.id}}
         |> Poison.encode!()
 
-      encoded_document = transform_function.(document)
+      encoded_document = document
+        |> transform_function.()
         |> Poison.encode!()
 
       header <> "\n" <> encoded_document
@@ -87,7 +88,7 @@ defmodule HCIndexer.Index do
   """
   @spec get_dated_index_name(String.t | Atom.t) :: String.t
   def get_dated_index_name(index) when is_atom(index) do
-    Atom.to_string(index) |> get_dated_index_name()
+    index |> Atom.to_string() |> get_dated_index_name()
   end
 
   def get_dated_index_name(index) when is_binary(index) do
@@ -101,7 +102,7 @@ defmodule HCIndexer.Index do
   Create an index from a struct using `HCIndexer.Searchable`
   """
   @spec create(module) ::
-    {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
+    {String.t, {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}}
   def create(module) do
     create(module.index, module.mapping, module.search_settings)
   end
@@ -110,27 +111,28 @@ defmodule HCIndexer.Index do
   Create an index, override previous one if exists
   """
   @spec create(atom, map, map) ::
-    {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
+    {String.t, {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}}
   def create(index, properties, settings \\ nil) do
     # Delete previous existing index
     index
     |> Atom.to_string()
     |> Alias.list_index()
-    |> Enum.map(&delete/1)
+    |> Enum.each(&delete/1)
     # Create index with mapping & settings
     data = %{
       mappings: %{
         index => %{
-          _all: %{ enabled: false }, # index only mapped attributes
+          _all: %{enabled: false}, # index only mapped attributes
           properties: properties,
         }
       },
       settings: settings,
-      aliases: %{ index => %{} }, # Create index alias with base index name
+      aliases: %{index => %{}}, # Create index alias with base index name
     }
     real_index_name = get_dated_index_name(index)
     Alias.delete_all(index)
-    {real_index_name, put(real_index_name, data)} # Create index with a dated name
+    # Create index with a dated name
+    {real_index_name, put(real_index_name, data)}
   end
 
   @doc """

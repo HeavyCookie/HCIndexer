@@ -11,7 +11,7 @@ defmodule HCIndexer.Search do
       @doc """
       Search in current ElasticSearch index, @see `HCIndexer.Search.search/2`
       """
-      @spec create_settings(atom, map) ::
+      @spec search(map) ::
         {:ok, HTTPoison.Response.t | HTTPoison.AsyncResponse.t} |
         {:error, HTTPoison.Error.t}
       def search(query), do: search(index(), query)
