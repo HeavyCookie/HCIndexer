@@ -107,7 +107,7 @@ defmodule HCIndexer.Index do
   @spec create(module) ::
     {String.t, {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}}
   def create(module) do
-    if Module.defines?(module, {:search_settings, 0}) do
+    if Enum.member?(module.__info__(:functions), {:search_settings, 0}) do
       create(module.index, module.mapping, module.search_settings)
     else
       create(module.index, module.mapping)
